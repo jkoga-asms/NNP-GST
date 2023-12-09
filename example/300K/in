@@ -1,0 +1,31 @@
+
+units metal
+boundary p p p
+atom_style atomic
+
+read_data ../coord_225.lammps
+
+mass 1 72.6
+mass 2 121.8
+mass 3 127.6
+
+
+pair_style hdnnp 6.0 dir ../../n2p2 showew no showewsum 1000 resetew yes maxew 10000000 cflength 1.0 cfenergy 1.0
+pair_coeff     * * Ge Sb Te
+
+timestep 0.004
+thermo 100
+
+velocity all create 300 1234
+
+dump          1 all custom 200 dump element type xsu ysu zsu
+dump_modify   1 element Ge Sb Te sort id
+
+###############################################################################
+# SIMULATION
+###############################################################################
+
+fix           1 all npt temp 300.0 300.0 0.1 iso 0 0 1
+
+run 1000000
+
