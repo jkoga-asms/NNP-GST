@@ -203,11 +203,20 @@ n2p2のアーカイブを配布元
 
 ソースコードはsrcディレクトリー以下に配置されている。srcディレクトリーに配置されているファイルやディレクトリーは下記の通り。
 
-application/ doc/ interface/ libnnp/ libnnpif/ libnnptrain/ makefile
-makefile.gnu makefile.intel makefile.llvm pynnp/
+- application/
+- doc/
+- interface/
+- libnnp/
+- libnnpif/
+- libnnptrain/
+- makefile
+- makefile.gnu
+- makefile.intel
+- makefile.llvm
+- pynnp/
 
-makefile.gnuはgcc用の設定が記述されたファイル，makefile.intelにはIntel
-oneAPI用の設定が記述されたファイル，makefile.llvmはclangコンパイラー用の設定が記述されたファイルである。これらの内利用したいコンパイラーに対応したファイルをエディターなどで開き，以下の赤色で示した部分を編集する。
+makefile.gnuはgcc用の設定が記述されたファイル，makefile.intelにはIntel oneAPI用の設定が記述されたファイル，makefile.llvmはclangコンパイラー用の設定が記述されたファイルである。
+これらの内利用したいコンパイラーに対応したファイルをエディターなどで開き，以下の赤色で示した部分を編集する。
 
 ::
 
