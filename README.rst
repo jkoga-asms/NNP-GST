@@ -408,12 +408,12 @@ GeSb\ :sub:`2`\ Te\ :sub:`4`\ の分子動力学シミュレーションにお�
 参考文献
 ========
 
-#. Jörg Behler and M. Parrinello, Phys. Rev. Lett. 98, 146401 (2007).
+#. J\. Behler and M. Parrinello, Phys. Rev. Lett. 98, 146401 (2007).
 #. Jörg Behler, International Journal of Quantum Chemistry 115, 1032 (2015)
-#. Giulio Imbalzano; Andrea Anelli, Daniele Giofré , Sinja Klees; Jörg Behler, Michele Ceriotti, J. Chem. Phys. 148, 241730 (2018).
-#. M  Gastegger, L. Schwiedrzik, M. Bittermann, F. Berzsenyi, P. Marquetand, J. Chem. Phys. 148, 241709 (2018).
-#. A  Singraber, T. Morawietz, J. Behler and C. Dellago, J. Chem. Theory Comput. 2019, 15 (5), 3075–3092.
-#. T  Yamasaki, A. Kuroda, T. Kato, J. Nara, J. Koga, T. Uda, K. Minami, and T. Ohno, Computer Physics Communications 244, 264-276 (2019).
+#. Giulio Imbalzano, Andrea Anelli, Daniele Giofré, Sinja Klees, Jörg Behler, Michele Ceriotti, J. Chem. Phys. 148, 241730 (2018).
+#. M\.  Gastegger, L. Schwiedrzik, M. Bittermann, F. Berzsenyi, P. Marquetand, J. Chem. Phys. 148, 241709 (2018).
+#. A\.  Singraber, T. Morawietz, J. Behler and C. Dellago, J. Chem. Theory Comput. 2019, 15 (5), 3075–3092.
+#. T\.  Yamasaki, A. Kuroda, T. Kato, J. Nara, J. Koga, T. Uda, K. Minami, and T. Ohno, Computer Physics Communications 244, 264-276 (2019).
 
 .. |image0| image:: media/image1.png
 .. |image1| image:: media/image2.svg
