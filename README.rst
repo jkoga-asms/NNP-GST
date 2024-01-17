@@ -238,7 +238,9 @@ Eigenのインストール先がたとえば/home/user/eigen3だった場合こ�
 
 この編集ができたら，たとえばmakefile.gnuを使う場合
 
-make COMP=gnu
+::
+
+  make COMP=gnu
 
 というコマンドを実行するとn2p2のコンパイルが始まる。
 問題が発生しなければNNPを作成するためのプログラムがbin以下に，LAMMPSなどとリンクするためのライブラリーがlib以下に生成される。
@@ -276,11 +278,15 @@ LAMMPSのアーカイブを配布元 (https://www.lammps.org/)からダウンロ
 前者はmpi並列用のMakefile, 後者はシリアル実行用のMakefileである。
 ここまで準備ができたらmakeコマンドによってLAMMPSをコンパイルすればよい。
 
-make mpi
+::
+
+  make mpi
 
 もしくは
 
-make serial
+::
+
+  make serial
 
 問題が発生しなければsrcディレクトリーの下にlmp_mpi (MPI並列版の場合) もしくはlmp_serial (MPI非並列版の場合)が得られる。
 
@@ -321,7 +327,9 @@ pair_coeffコマンドによって一番目の元素がGe, 二番目の元素が
 
 通常通りLAMMPSを起動すればよい。たとえば以下のようなコマンドを実行する。
 
-mpiexec -n N ~/lammps-2Aug2023/src/lmp_mpi -in in
+::
+
+  mpiexec -n N ~/lammps-2Aug2023/src/lmp_mpi -in in
 
 NはMPI並列数である。利用しているコンピューターのコア数を超えない数値を指定する。
 
@@ -332,7 +340,9 @@ NはMPI並列数である。利用しているコンピューターのコア数�
 
 MD計算中は上述のshowewsumの設定に応じてエラーの積算値が出力される。
 
-### NNP EW SUMMARY ### TS: 1000 EW 203 EWPERSTEP 2.030e-01
+::
+
+  ### NNP EW SUMMARY ### TS: 1000 EW 203 EWPERSTEP 2.030e-01
 
 1000ステップに一度エラーの積算値が出力されており，総計203回，1 MDステップあたり2.03e-01回エラーが発生したことが分かる。
 この例では初期配置として教師データに含まれない構造を採用したのでエラーが発生してしまったが，以降シミュレーションが進行するに従いエラーは減っていく傾向だった。
