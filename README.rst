@@ -658,13 +658,55 @@ weights.xxx.yyyy.out             ニューラルネットワークの重み係�
                                  yyyyはepoch番号である。
 ================================ ==================================================================
 
-``learning-curve.out`` ファイルには学習の収束具合が記録される。たとえば以下のような内容になる。
+``learning-curve.out`` ファイルには学習の差異の訓練データおよびテストデータとの誤差が記録される。たとえば以下のような内容になる。
 
+::
+
+  ################################################################################
+  # Learning curves for energies and forces.
+  ################################################################################
+  # Col  Name             Description
+  ################################################################################
+  # 1    epoch            Current epoch.
+  # 2    RMSEpa_Etrain_pu RMSE of training energies per atom (physical units)
+  # 3    RMSEpa_Etest_pu  RMSE of test energies per atom (physical units)
+  # 4    RMSE_Etrain_pu   RMSE of training energies (physical units)
+  # 5    RMSE_Etest_pu    RMSE of test energies (physical units)
+  # 6    MAEpa_Etrain_pu  MAE of training energies per atom (physical units)
+  # 7    MAEpa_Etest_pu   MAE of test energies per atom (physical units)
+  # 8    MAE_Etrain_pu    MAE of training energies (physical units)
+  # 9    MAE_Etest_pu     MAE of test energies (physical units)
+  # 10   RMSE_Ftrain_pu   RMSE of training forces (physical units)
+  # 11   RMSE_Ftest_pu    RMSE of test forces (physical units)
+  # 12   MAE_Ftrain_pu    MAE of training forces (physical units)
+  # 13   MAE_Ftest_pu     MAE of test forces (physical units)
+  # 14   RMSEpa_Etrain_iu RMSE of training energies per atom (training units)
+  # 15   RMSEpa_Etest_iu  RMSE of test energies per atom (training units)
+  # 16   RMSE_Etrain_iu   RMSE of training energies (training units)
+  # 17   RMSE_Etest_iu    RMSE of test energies (training units)
+  # 18   MAEpa_Etrain_iu  MAE of training energies per atom (training units)
+  # 19   MAEpa_Etest_iu   MAE of test energies per atom (training units)
+  # 20   MAE_Etrain_iu    MAE of training energies (training units)
+  # 21   MAE_Etest_iu     MAE of test energies (training units)
+  # 22   RMSE_Ftrain_iu   RMSE of training forces (training units)
+  # 23   RMSE_Ftest_iu    RMSE of test forces (training units)
+  # 24   MAE_Ftrain_iu    MAE of training forces (training units)
+  # 25   MAE_Ftest_iu     MAE of test forces (training units)
+  ##################################################################################################################################################################################################################################################################################################################################################################################################################################
+  #        1                2                3                4                5                6                7                8                9               10               11               12               13               14               15               16               17               18               19               20               21               22
+        23               24               25
+  #    epoch RMSEpa_Etrain_pu  RMSEpa_Etest_pu   RMSE_Etrain_pu    RMSE_Etest_pu  MAEpa_Etrain_pu   MAEpa_Etest_pu    MAE_Etrain_pu     MAE_Etest_pu   RMSE_Ftrain_pu    RMSE_Ftest_pu    MAE_Ftrain_pu     MAE_Ftest_pu RMSEpa_Etrain_iu  RMSEpa_Etest_iu   RMSE_Etrain_iu    RMSE_Etest_iu  MAEpa_Etrain_iu   MAEpa_Etest_iu    MAE_Etrain_iu     MAE_Etest_iu   RMSE_Ftrain_iu    RMSE_Ftest_iu    MAE_Ftrain_iu     MAE_Ftest_iu
+  ##################################################################################################################################################################################################################################################################################################################################################################################################################################
+             0   1.35549798E-03   5.76728147E-04   2.00248431E-01   3.53961709E-02   1.17549549E-03   4.75449108E-04   1.40966961E-01   2.91890733E-02   2.75526589E-02   1.94204702E-02   1.83888104E-02   1.50295473E-02   1.15444435E+00   4.91185202E-01   1.70546672E+02   3.01460497E+01   1.00114064E+00   4.04928331E-01   1.20058100E+02   2.48596170E+01   1.02928276E+00   7.25489151E-01   6.86949507E-01   5.61457751E-01
+             1   2.00593579E-03   1.73507278E-03   3.42678216E-01   1.52523426E-01   1.58986626E-03   1.44167622E-03   2.23821829E-01   1.06086833E-01   2.57738072E-02   2.00746032E-02   1.71130140E-02   1.46422170E-02   1.70840626E+00   1.47771889E+00   2.91850622E+02   1.29900457E+02   1.35405006E+00   1.22784024E+00   1.90623556E+02   9.03515506E+01   9.62830320E-01   7.49925550E-01   6.39289669E-01   5.46988280E-01
+             2   5.87739903E-04   5.83183998E-04   7.29433297E-02   3.72266554E-02   4.82042388E-04   5.10077063E-04   4.92760252E-02   3.15678670E-02   2.71801537E-02   2.24067314E-02   1.78866331E-02   1.65356277E-02   5.00563645E-01   4.96683492E-01   6.21240429E+01   3.17050284E+01   4.10543666E-01   4.34420111E-01   4.19671808E+01   2.68855773E+01   1.01536711E+00   8.37046701E-01   6.68189707E-01   6.17720292E-01
+    
+1行が1 epochの誤差の記録となる。1行あたり多くの列が出力されるが，ヘッダー部分に各列の意味合いが記述されている。記録される誤差はmean-average errorもしくはroot mean square errorであり，原子間力かエネルギーか，訓練データかテストデータか，プログラム内部の単位か実単位か，などの組み合わせになっている。基本的にはテストデータに対応する列の数値が小さいほどよい。特に気を付ける必要があるのは訓練データの誤差は小さくなっているにも関わらずテストデータの誤差が大きくなっているような状況で，これはいわゆる過学習状態に陥ってしまっている蓋然性が高い。
 
 ファイルコピー（リネーム）
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-``nnp-train`` が出力するファイルのファイル名は ``weights.xxx.yyyy.out`` であるが，実際に利用する際には ``weights.xxx.data`` というファイル名にする必要がある。学習の履歴を確認して採用するepochを決めたらファイルをコピーもしくはリネームする。
+  
+  ``nnp-train`` が出力するファイルのファイル名は ``weights.xxx.yyyy.out`` であるが，実際に利用する際には ``weights.xxx.data`` というファイル名にする必要がある。学習の履歴を確認して採用するepochを決めたらファイルをコピーもしくはリネームする。
 
 ::
   
