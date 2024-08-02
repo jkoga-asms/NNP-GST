@@ -37,7 +37,7 @@ $f _ {i}^{j}$ は $j$ 番目の層が $i$ 番目のノードにもたらす作�
 
 $$G _ {i}^{2} = \\sum _ {j = 1}^{N _ {\\text{atom}}}{{\\exp \\left \\lbrack - \\eta _ {2} \\left( r _ {\\text{ij}} - R _ {s} \\right)^{2} \\right \\rbrack}{f _ {c} \\left( r _ { \\text{ij}} \\right)}}$$
 
-$$G _ {i}^{3} = 2^{1 - \\zeta} \\sum _ {j \\neq i}^{}{\\sum _ {k \\neq i,j}^{}{\\left( 1 + \\lambda \\cos \\theta _ {\\text{ijk}} \\right)^{\\zeta} \\exp \\left \\lbrack - \\eta _ {3} \\left( r _ {\\text{ij}}^{2} + r _ {\\text{ik}}^{2} + r _ {\\text{jk}}^{2} \\right) \\right \\rbrack f _ {c} \\left( r _ {\\text{ij}} \\right)f _ {c} \\left( r _ {\\text{ik}} \\right)f _ {c} \\left( r _ {\\text{jk}} \\right)}}$$
+$$G _ {i}^{3} = 2^{1 - \\zeta} \\sum _ {j \\neq i}^{}{\\sum _ {k \\neq i,j}^{}{\\left( 1 + \\lambda \\cos \\theta _ {\\text{ijk}} \\right)^{\\zeta} \\exp \\left \\lbrack - \\eta _ {3} \\left\\{ \\left(r _ {\\text{ij}}-r_s\\right)^{2} + \\left(r _ {\\text{ik}}-r_s\\right)^{2} + \\left(r _ {\\text{jk}}-r_s\\right)^{2} \\right\\} \\right \\rbrack f _ {c} \\left( r _ {\\text{ij}} \\right)f _ {c} \\left( r _ {\\text{ik}} \\right)f _ {c} \\left( r _ {\\text{jk}} \\right)}}$$
 
 $G _ {i}^{2}$ は $i$ 番目の原子に対する2体のsymmetry functionである。
 $r _ \\text{ij}$ は原子ij間の距離であり， $\\eta _ 2$ や $R _ s$ はこのsymmetry functionの特性を決める係数である。
