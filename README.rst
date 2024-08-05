@@ -37,7 +37,7 @@ $f _ {i}^{j}$ は $j$ 番目の層が $i$ 番目のノードにもたらす作�
 
 $$G _ {i}^{2} = \\sum _ {j = 1}^{N _ {\\text{atom}}}{{\\exp \\left \\lbrack - \\eta _ {2} \\left( r _ {\\text{ij}} - R _ {s} \\right)^{2} \\right \\rbrack}{f _ {c} \\left( r _ { \\text{ij}} \\right)}}$$
 
-$$G _ {i}^{3} = 2^{1 - \\zeta} \\sum _ {j \\neq i}^{}{\\sum _ {k \\neq i,j}^{}{\\left( 1 + \\lambda \\cos \\theta _ {\\text{ijk}} \\right)^{\\zeta} \\exp \\left \\lbrack - \\eta _ {3} \\left( r _ {\\text{ij}}^{2} + r _ {\\text{ik}}^{2} + r _ {\\text{jk}}^{2} \\right) \\right \\rbrack f _ {c} \\left( r _ {\\text{ij}} \\right)f _ {c} \\left( r _ {\\text{ik}} \\right)f _ {c} \\left( r _ {\\text{jk}} \\right)}}$$
+$$G _ {i}^{3} = 2^{1 - \\zeta} \\sum _ {j \\neq i}^{}{\\sum _ {k \\neq i,j}^{}{\\left( 1 + \\lambda \\cos \\theta _ {\\text{ijk}} \\right)^{\\zeta} \\exp \\left \\lbrack - \\eta _ {3} \\left\\{ \\left(r _ {\\text{ij}}-r_s\\right)^{2} + \\left(r _ {\\text{ik}}-r_s\\right)^{2} + \\left(r _ {\\text{jk}}-r_s\\right)^{2} \\right\\} \\right \\rbrack f _ {c} \\left( r _ {\\text{ij}} \\right)f _ {c} \\left( r _ {\\text{ik}} \\right)f _ {c} \\left( r _ {\\text{jk}} \\right)}}$$
 
 $G _ {i}^{2}$ は $i$ 番目の原子に対する2体のsymmetry functionである。
 $r _ \\text{ij}$ は原子ij間の距離であり， $\\eta _ 2$ や $R _ s$ はこのsymmetry functionの特性を決める係数である。
@@ -421,6 +421,405 @@ GeSb\ :sub:`2`\ Te\ :sub:`4`\ の分子動力学シミュレーションにお�
 #. M\.  Gastegger, L. Schwiedrzik, M. Bittermann, F. Berzsenyi, P. Marquetand, J. Chem. Phys. 148, 241709 (2018).
 #. A\.  Singraber, T. Morawietz, J. Behler and C. Dellago, J. Chem. Theory Comput. 2019, 15 (5), 3075–3092.
 #. T\.  Yamasaki, A. Kuroda, T. Kato, J. Nara, J. Koga, T. Uda, K. Minami, and T. Ohno, Computer Physics Communications 244, 264-276 (2019).
+
+補遺
+========
+
+ニューラルネットワークポテンシャルの作り方
+--------------------------------------------
+
+本リポジトリでは第一原理バンド計算ソフトウェアPHASE/0を用いて作成した教師データとニューラルネットワークポテンシャル作成ソフトウェアn2p2用の入力ファイルを公開している。ここではこれらのファイルを用いてニューラルネットワークポテンシャルを作成する具体的な手続きを紹介する。
+
+
+教師データファイル
+~~~~~~~~~~~~~~~~~~~~
+
+教師データファイルのファイル名はinput.dataである。リポジトリの `training_data <https://github.com/atomic-scale/NNP-GST/tree/main/training_data>`_ 以下に配置されている。ファイルサイズの関係で分割して保存されているので，以下の要領で結合して利用する。
+
+::
+
+  cat xa? | xz -d > input.data
+
+
+おおよそ771MB程度の大きさのファイルが得られる。その内容を抜粋する。
+
+::
+
+   begin
+  comment phase0_1500_0
+  lattice         8.516892992400864        -0.025242363548024        -0.000694876561710
+  lattice         4.236533604743143         7.413961973164201        -0.001139519543545
+  lattice        -0.096170146547667        -0.234410814552019        54.370394528364578
+  atom        -0.222759166010661         0.084208040563042         0.299883377989237 Ge    0.0 0.0         0.299739319401635        -0.322056503244542        -0.277062180980615
+  atom         6.312908761141252         1.584407379396599         3.783418586980273 Ge    0.0 0.0         0.133080349736049        -0.624624037188481        -0.021237320108574
+  atom         1.811583586837962         1.180068902721112         3.914461900153025 Ge    0.0 0.0         0.060935167866004        -0.070088298566551        -0.243380716885904
+  ...
+  ...
+  energy    -68792.976955941441702
+  charge 0.0
+  end
+
+一つの原子配置のデータを ``begin`` と ``end`` の間に記述する。すなわち，以下のコマンドによって原子配置がいくつ定義された教師データファイルなのかを調べることができる。
+
+::
+
+ $ grep begin input.data | wc -l
+ 47428
+
+``begin`` に続く行はコメント行である。何を記録してもよいが，その原子配置の素性が分かるような文字列を利用することが望ましい。``lattice`` から始まる三行に格子ベクトルをÅ単位で記録する。一つ一つの原子は ``atom`` から始まる行で記録する。スペース区切りで次のように9つのデータを記述する。
+
+::
+
+  x座標 y座標 z座標 元素名 電荷(未使用） n (詳細不明，未使用) 原子間力のx座標 原子間力のy座標 原子間力のz座標
+
+長さの単位はÅ, 原子間力の単位はeV/Åである。エネルギーは ``energy`` の後にeV単位で記録する。最後に系の総電荷を ``charge`` のあとに記録することができる。
+
+n2p2の入力ファイル
+~~~~~~~~~~~~~~~~~~~~
+
+n2p2の入力ファイルのファイル名は ``input.nn`` である。リポジトリの `n2p2 <https://github.com/atomic-scale/NNP-GST/tree/main/n2p2>`_ の下に配置されている。主要部分を抜粋する。
+
+::
+
+  ###############################################################################
+  # DATA SET NORMALIZATION
+  ###############################################################################
+  mean_energy  -2.5528578277780052E+00 # nnp-norm
+  conv_energy   6.8819868611177233E+00 # nnp-norm
+  conv_length   4.7939149349223875E+00 # nnp-norm
+  ###############################################################################
+
+  ###############################################################################
+  # GENERAL NNP SETTINGS
+  ###############################################################################
+  # These keywords are (almost) always required.
+  number_of_elements             3             # Number of elements.
+  elements                        Ge Sb Te     # Specification of elements.
+  atom_energy                     Ge -103.43071732189050 # Free atom reference energy
+  atom_energy                     Sb -2191.81887945960460 # Free atom reference energy
+  atom_energy                     Te -223.5391948990360 # Free atom reference energy
+  cutoff_type                     2              # Cutoff type (optional argument: shift parameter alpha).
+  scale_symmetry_functions                       # Scale all symmetry functions with min/max values.
+  #scale_symmetry_functions_sigma                 # Scale all symmetry functions with sigma.
+  scale_min_short                 0.0            # Minimum value for scaling.
+  scale_max_short                 1.0            # Maximum value for scaling.
+  center_symmetry_functions                      # Center all symmetry functions, i.e. subtract mean value.
+  global_hidden_layers_short      2              # Number of hidden layers.
+  global_nodes_short              20 20             # Number of nodes in each hidden layer.
+  global_activation_short         t t l          # Activation function for each hidden layer and output layer.
+  #normalize_nodes                                # Normalize input of nodes.
+  ...
+  ...
+  ...
+  #
+  ###############################################################################
+  # ADDITIONAL SETTINGS FOR DATASET TOOLS
+  ###############################################################################
+  # These keywords are used only by some tools handling data sets:
+  # nnp-comp2, nnp-scaling, nnp-dataset, nnp-train.
+  use_short_forces                               # Use forces.
+  random_seed                     1234567        # Random number generator seed.
+
+  ###############################################################################
+  # ADDITIONAL SETTINGS FOR TRAINING
+  ###############################################################################
+  # These keywords are solely used for training with nnp-train.
+  epochs                          200            # Number of training epochs.
+  ...
+  ...
+  test_fraction                   0.1            # Fraction of structures kept for testing.
+  force_weight                    10.0           # Weight of force updates relative to energy updates.
+  short_energy_fraction           1.000          # Fraction of energy updates per epoch.
+  short_force_fraction            0.0041         # Fraction of force updates per epoch.
+  ...
+  ...
+  write_trainpoints               100           # Write energy comparison every this many epochs.
+  write_trainforces               100              # Write force comparison every this many epochs.
+  write_weights_epoch             1              # Write weights every this many epochs.
+  write_neuronstats               100              # Write neuron statistics every this many epochs.
+  write_trainlog                                 # Write training log file.
+  ...
+  ...
+  ...
+  symfunction_short Ge 2 Ge 3.951E-01 1.500E+00 6.000E+00
+  symfunction_short Ge 2 Ge 3.951E-01 2.625E+00 6.000E+00
+  ...
+  ...
+  ...
+  symfunction_short Ge 3 Ge Ge 3.951E-01 -1 1.000E+00 6.000E+00 1.500E+00
+  symfunction_short Ge 3 Ge Ge 3.951E-01  1 1.000E+00 6.000E+00 1.500E+00
+  ...
+  ...
+  ...
+
+``#`` から始まる行はコメント扱いとなる。基本的には ``keyword value`` という形式で設定を施すが，symmetry functionの設定は複雑なこともありこの限りではない。
+
+``input.nn`` ファイルの先頭には ``mean_energy`` ``conv_energy`` ``conv_length`` というキーワードの設定値があり，これらは教師データの規格化因子である。``input.data`` のデータから手動で計算してもよいが後に説明する ``nnp-norm`` プログラムによってプログラムに決めさせることが推奨である。
+
+``number_of_elements`` に元素数を指定し， ``elements`` に元素名を指定する。``atom_energy`` には元素の単体原子のエネルギーを指定する。原子のエネルギーはエネルギーの原点を変更するに過ぎないので0にしてもよいが，教師データに化学量論比の異なるデータが含まれる場合は原点がきっちりと定まっていた方がよい学習ができる場合がある。
+
+``global_hidden_layers_short`` にはニューラルネットワークの隠れ層の数を指定し，さらに ``global_nodes_short`` において各隠れ層の層数を指定する。``global_activation_short`` には各層において用いるacitvation functionを指定する。最初の2つの文字列が隠れ層に対応する。3番目の，最後の指定が出力層に対応する。この例の場合隠れ層2層は ``t`` すなわちhyperbolic tangent関数が，出力層は ``l`` すなわち線形の関数が利用される指定となる。
+
+``use_short_forces`` を指定するとエネルギーだけでなく原子間力を用いた学習を行う。このオプションを有効にするとより精度の高い学習が行われることが期待できるが，メモリ要求が飛躍的に増加する。たとえば本リポジトリの ``input.data`` ファイルの場合 ``use_short_forces`` を有効にすると学習時に約230 GBのメモリが必要であった。このオプションを用いて大きな教師データを用いた学習を行う場合，十分なノード数を確保できる分散並列環境は必須である。
+
+``epochs`` には学習の上限回数を指定する。ここでは200としているが，n2p2による学習は多くの場合数十epochでそれ以上学習してもあまり改善しない状態になる。各epochのポテンシャルファイル自体は履歴が残るようになっているので，あとからログを見返して最もよさそうなepochのポテンシャルファイルを利用するようにすればよい。
+
+``test_fraction`` には教師データのうちテストにまわす割り合いを指定する。この例では0.1としている。
+
+``write_trainpoints`` ``write_trainforces`` には原子間力を何epochに一回出力するかを指定する。頻繁に出力するとファイル数が膨大になるので，この例では100とし，ある程度抑制する設定を施している。``write_weights_epoch`` には何epochに一回ニューラルネットワークの重みデータを出力するかを指定する。こちらは最もよいepochをあとから見出して採用するファイルを決めたいので，毎epoch出力する1という値を指定している。
+
+``symfunction_short`` によって利用したいsymmetry functionを定義する。 ``symfunction_short`` 以降スペース区切りでそのsymmetry functionの設定を行う。1つ目の設定は対応する元素，2つ目の設定はsymmetry functionの種類を表す整数値である。3つ目以降はsymmetry functionの種類に応じて変化する部分である。Symmetry functionの種類が2というのは $G^2_i$ に対応する。相手の元素 $\\eta_2$ $r_s$ カットオフ長 の順にスペース区切りで設定を施す。Symmetry functionの種類が3というのは $G^3_i$ に対応する。相手の元素1 相手の元素2 $\\eta_3$ $\\lambda$ $\\zeta$ カットオフ長 $r_s$ の順にスペース区切りで設定を施す。Symmetry functionをいくつ定義するか，また各symmetry functionのパラメーターをどのように選べばよいかについての指針は，たとえば文献[3],[4]などにおいて提案されている。本リポジトリの ``input.nn`` ファイルは文献[4]の指針に従って決めている。その際， `sfparamgen.pyスクリプト <https://e-cam.readthedocs.io/en/latest/Classical-MD-Modules/modules/n2p2/n2p2_symfunc_param_generator/readme.html>`_ を用いると比較的簡単に設定することができる。
+
+ポテンシャルファイル作成
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+以降n2p2のインストールは上述の方法によって終了しているものとして説明を行う。また，n2p2は ``$HOME/n2p2`` 以下にインストールされていることを想定する。
+
+教師データの規格化因子の計算
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+教師データの規格化因子を計算する。この処理は ``input.nn`` ファイルに ``mean_energy`` ``conv_energy`` ``conv_length`` の設定がすでに施されている場合行う必要がない。作業ディレクトリーに ``input.nn`` ファイルと ``input.data`` ファイルを配置し，以下のコマンドを実行すればよい。
+
+::
+
+  $HOME/n2p2/bin/nnp-norm
+
+この処理はたとえ巨大な教師データファイルを用いたとしてもすぐに終了するので，非並列で実行している。このプログラムは規格化因子を計算し，その結果を ``input.nn`` ファイルに記録する。 ``input.nn`` ファイルの先頭を確認し，``mean_energy`` ``conv_energy`` ``conv_length`` の設定が記録されていればこの段は終了である。
+
+座標データの記述子への変換
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+教師データを記述子に変換する。以下のコマンドを実行すればよい。
+
+::
+
+  mpirun -n N $HOME/n2p2/bin/nnp-scaling 100
+
+このコマンドは ``nnp-norm`` よりは時間がかかるため， ``mpirun`` を介して実行することによってMPI並列実行を行っている。コマンド中の ``N`` はMPI並列数である。所要時間は教師データサイズの大きさや並列数に依存する。このコマンドによってsymmetry functionの変換が行われるが，この際symmetry functionの分布のヒストグラムが出力される。ヒストグラム出力の分割数を引数に与える（上述の例では100）
+
+``nnp-scaling`` を実行すると以下のようなファイル群が得られる。
+
+================================ ==================================================================
+ファイル名                       説明
+================================ ==================================================================
+function.data                    symmetry functionの情報が記録されるファイル
+nnp-scaling.log.xxxx             nnp-scalingのログファイル。xxxxはMPIのプロセス番号
+scaling.data                     symmetry functionのスケーリングに関する情報が記録されている\
+                                 ファイル。訓練時やポテンシャル利用時にも必要となる重要なファイル。
+sf.xxx.yyy.histo                 ヒストグラムが記録されたファイル。xxxは原子番号，yyyは\
+                                 symmetry functionの識別番号。
+================================ ==================================================================
+
+``nnp-scaling.log.xxxx`` ファイルには，以下のように使用メモリの情報が記録される。
+
+::
+
+  *** MEMORY USAGE ESTIMATION ***************************************************
+
+  Estimated memory usage for training (keyword "memorize_symfunc_results":
+  Valid for training of energies and forces.
+  Memory for local structures  :        19426660 bytes (18.53 MiB = 0.02 GiB).
+  Memory for all structures    :       108669504 bytes (103.64 MiB = 0.10 GiB).
+  Average memory per structure :         5433475 bytes (5.18 MiB).
+  *******************************************************************************
+
+ニューラルネットワークの学習
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``nnp-norm`` ``nnp-scaling`` を実行すると必要なデータがそろうので， ``nnp-train`` によって学習を行う。必要に応じて ``input.nn`` ファイルを編集し，以下のようなコマンドによって学習を行う。
+
+::
+
+  mpirun -n N $HOME/n2p2/bin/nnp-train
+
+``nnp-scaling`` の場合と同様MPI並列で実行する例である。``nnp-train`` は特に引数はない。実行時間は教師データの数や並列数に大きく依存するが， ``nnp-scaling`` よりははるかに多くの時間がかかると考えられる。
+
+``nnp-train`` を実行すると以下のようなファイル群が得られる。
+
+================================ ==================================================================
+ファイル名                       説明
+================================ ==================================================================
+learning-curve.out               Epochごとのエネルギーや原子間力のMAE, RMSEなどが記録されている\
+                                 ファイル。
+neuron-stats.xxxx.out            ニューロン情報が記録されているファイル。xxxxはepoch番号
+nnp-train.log.xxxx               ``nnp-train`` のログファイル。xxxxはMPIプロセス番号
+test.data                        教師データのうちテストに回したデータ
+testforces.xxxx.out              テストデータの原子間力が記録されているファイル。xxxxはepoch番号
+testpoints.xxxx.out              テストデータのエネルギーが記録されているファイル。xxxxはepoch番号
+timing.out                       経過時間が記録されているファイル。
+train-log.out                    nnp-train.log.xxxxファイルとは異なる情報が記録されたログファイル
+train.data                       教師データのうち訓練に用いるデータ
+trainforces.xxxx.out             訓練データの原子間力が記録されているファイル。xxxxはepoch番号
+trainpoints.xxxx.out             訓練データのエネルギーが記録されているファイル。xxxxはepoch番号
+updater.000.out                  学習過程の詳細が記録されているファイル。
+weights.xxx.yyyy.out             ニューラルネットワークの重み係数が記録されているファイル。\
+                                 ポテンシャル使用の際に必要となるファイル。xxxは原子番号，\
+                                 yyyyはepoch番号である。
+================================ ==================================================================
+
+``learning-curve.out`` ファイルには学習の差異の訓練データおよびテストデータとの誤差が記録される。たとえば以下のような内容になる。
+
+::
+
+  ################################################################################
+  # Learning curves for energies and forces.
+  ################################################################################
+  # Col  Name             Description
+  ################################################################################
+  # 1    epoch            Current epoch.
+  # 2    RMSEpa_Etrain_pu RMSE of training energies per atom (physical units)
+  # 3    RMSEpa_Etest_pu  RMSE of test energies per atom (physical units)
+  # 4    RMSE_Etrain_pu   RMSE of training energies (physical units)
+  # 5    RMSE_Etest_pu    RMSE of test energies (physical units)
+  # 6    MAEpa_Etrain_pu  MAE of training energies per atom (physical units)
+  # 7    MAEpa_Etest_pu   MAE of test energies per atom (physical units)
+  # 8    MAE_Etrain_pu    MAE of training energies (physical units)
+  # 9    MAE_Etest_pu     MAE of test energies (physical units)
+  # 10   RMSE_Ftrain_pu   RMSE of training forces (physical units)
+  # 11   RMSE_Ftest_pu    RMSE of test forces (physical units)
+  # 12   MAE_Ftrain_pu    MAE of training forces (physical units)
+  # 13   MAE_Ftest_pu     MAE of test forces (physical units)
+  # 14   RMSEpa_Etrain_iu RMSE of training energies per atom (training units)
+  # 15   RMSEpa_Etest_iu  RMSE of test energies per atom (training units)
+  # 16   RMSE_Etrain_iu   RMSE of training energies (training units)
+  # 17   RMSE_Etest_iu    RMSE of test energies (training units)
+  # 18   MAEpa_Etrain_iu  MAE of training energies per atom (training units)
+  # 19   MAEpa_Etest_iu   MAE of test energies per atom (training units)
+  # 20   MAE_Etrain_iu    MAE of training energies (training units)
+  # 21   MAE_Etest_iu     MAE of test energies (training units)
+  # 22   RMSE_Ftrain_iu   RMSE of training forces (training units)
+  # 23   RMSE_Ftest_iu    RMSE of test forces (training units)
+  # 24   MAE_Ftrain_iu    MAE of training forces (training units)
+  # 25   MAE_Ftest_iu     MAE of test forces (training units)
+  ##################################################################################################################################################################################################################################################################################################################################################################################################################################
+  #        1                2                3                4                5                6                7                8                9               10               11               12               13               14               15               16               17               18               19               20               21               22
+        23               24               25
+  #    epoch RMSEpa_Etrain_pu  RMSEpa_Etest_pu   RMSE_Etrain_pu    RMSE_Etest_pu  MAEpa_Etrain_pu   MAEpa_Etest_pu    MAE_Etrain_pu     MAE_Etest_pu   RMSE_Ftrain_pu    RMSE_Ftest_pu    MAE_Ftrain_pu     MAE_Ftest_pu RMSEpa_Etrain_iu  RMSEpa_Etest_iu   RMSE_Etrain_iu    RMSE_Etest_iu  MAEpa_Etrain_iu   MAEpa_Etest_iu    MAE_Etrain_iu     MAE_Etest_iu   RMSE_Ftrain_iu    RMSE_Ftest_iu    MAE_Ftrain_iu     MAE_Ftest_iu
+  ##################################################################################################################################################################################################################################################################################################################################################################################################################################
+             0   1.35549798E-03   5.76728147E-04   2.00248431E-01   3.53961709E-02   1.17549549E-03   4.75449108E-04   1.40966961E-01   2.91890733E-02   2.75526589E-02   1.94204702E-02   1.83888104E-02   1.50295473E-02   1.15444435E+00   4.91185202E-01   1.70546672E+02   3.01460497E+01   1.00114064E+00   4.04928331E-01   1.20058100E+02   2.48596170E+01   1.02928276E+00   7.25489151E-01   6.86949507E-01   5.61457751E-01
+             1   2.00593579E-03   1.73507278E-03   3.42678216E-01   1.52523426E-01   1.58986626E-03   1.44167622E-03   2.23821829E-01   1.06086833E-01   2.57738072E-02   2.00746032E-02   1.71130140E-02   1.46422170E-02   1.70840626E+00   1.47771889E+00   2.91850622E+02   1.29900457E+02   1.35405006E+00   1.22784024E+00   1.90623556E+02   9.03515506E+01   9.62830320E-01   7.49925550E-01   6.39289669E-01   5.46988280E-01
+             2   5.87739903E-04   5.83183998E-04   7.29433297E-02   3.72266554E-02   4.82042388E-04   5.10077063E-04   4.92760252E-02   3.15678670E-02   2.71801537E-02   2.24067314E-02   1.78866331E-02   1.65356277E-02   5.00563645E-01   4.96683492E-01   6.21240429E+01   3.17050284E+01   4.10543666E-01   4.34420111E-01   4.19671808E+01   2.68855773E+01   1.01536711E+00   8.37046701E-01   6.68189707E-01   6.17720292E-01
+    
+1行が1 epochの誤差の記録となる。1行あたり多くの列が出力されるが，ヘッダー部分に各列の意味合いが記述されている。記録される誤差はmean-average errorもしくはroot mean square errorであり，原子間力かエネルギーか，訓練データかテストデータか，プログラム内部の単位か実単位か，などの組み合わせになっている。基本的にはテストデータに対応する列の数値が小さいほどよい。特に気を付ける必要があるのは訓練データの誤差は小さくなっているにも関わらずテストデータの誤差が大きくなっているような状況で，これはいわゆる過学習状態に陥ってしまっている蓋然性が高い。
+
+ファイルコピー（リネーム）
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+``nnp-train`` が出力するファイルのファイル名は ``weights.xxx.yyyy.out`` であるが，実際に利用する際には ``weights.xxx.data`` というファイル名にする必要がある。学習の履歴を確認して採用するepochを決めたらファイルをコピーもしくはリネームする。
+
+::
+  
+  cp  weights.xxx.yyyy.out weights.xxx.data
+
+``weigts.xxx.data`` ファイル， ``input.nn`` ファイル， ``scaling.data`` ファイルがニューラルネットワークポテンシャルを利用するために必要なファイル群なので，これらのファイルを一つのディレクトリーにまとめておいておく。
+
+作ったニューラルネットワークポテンシャルの使い方
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+LAMMPSからニューラルネットワークポテンシャルを利用する方法は上述した通り。ここではn2p2に含まれる ``nnp-predict`` を用いてエネルギーや原子間力の計算を行う方法を紹介する。通常LAMMPSを用いればそれで事足りるが， ``nnp-predict`` を利用すると教師データとの差分が計算されたり原子ごとのエネルギーを求めることができたりするため，有用な場合もある。
+
+ポテンシャルファイル群を一つのディレクトリーに配置し，さらに対象としたい原子座標データを同じディレクトリーの ``input.data`` ファイルに記述する。``input.data`` ファイルの形式は教師データのそれと同じであるが，複数の原子配置が記録されていたとしても最初の一つのみが計算対象となる。
+
+準備ができたら以下の要領で ``nnp-predict`` を実行する。
+
+::
+
+  mpirun -n N $HOME/n2p2/bin/nnp-predict 0
+
+引数にはデバッグ用の情報を ``structure.out`` に出力するかどうかを指定する。0を指定するとデバッグ情報は出力されず，1を指定すると出力される。以下のようなファイル群が得られる。
+
+================================ ==================================================================
+ファイル名                       説明
+================================ ==================================================================
+energy.out                       エネルギーが記録されるファイル。``input.data`` 
+                                 ファイルに記録されているエネルギーの値との差分も記録される。
+nnatoms.out                      原子ごとのエネルギーが記録されるファイル。
+nnforces.out                     原子間力が記録されるファイル。``input.data`` ファイル\
+                                 に記録されている原子間力との差分も記録される。
+output.data                      ``input.data`` ファイルのエネルギーや原子間力が\
+                                 ニューラルネットワークのそれに置き換わったファイル
+structure.out                    実行時に引数に1を渡した場合にデバッグ情報が記録されるファイル
+nnp-predict.log                  ログファイル。エネルギーや原子間力の計算結果はこのファイルからも\
+                                 参照することができる。
+================================ ==================================================================
+
+``energy.out`` ファイルには以下の要領でエネルギーが記録される。
+
+::
+
+  ################################################################################
+  # Energy comparison.
+  ################################################################################
+  # Col  Name     Description
+  ################################################################################
+  # 1    Ennp     Potential energy predicted by NNP.
+  # 2    Eref     Reference potential energy.
+  # 3    Ediff    Difference between reference and NNP prediction.
+  # 4    E_offset Sum of atomic offset energies (included in column Ennp).
+  ################################################################################
+  #              1                2                3                4
+  #           Ennp             Eref            Ediff         E_offset
+  ###################################################################
+   -4.90037247E+03  -4.90037328E+03  -8.10829542E-04   0.00000000E+00
+
+最後の行にエネルギーが記録される。ニューラルネットワークポテンシャルによるエネルギー， ``input.data`` ファイルに記録されているエネルギー，差分のエネルギー，エネルギーの原点の順にスペース区切りで記録される。単位はeVである。
+
+
+``nnatoms.out`` ファイルには以下のように原子ごとのエネルギーが記録される。
+
+::
+
+  ################################################################################
+  # Energy contributions calculated from NNP.
+  ################################################################################
+  # Col  Name      Description
+  ################################################################################
+  # 1    index     Atom index.
+  # 2    e         Element of atom.
+  # 3    charge    Atomic charge (not used).
+  # 4    Ennp_atom Atomic energy contribution (physical units, no mean or offset energy added).
+  ################################################################################
+  #        1  2                3                4
+  #    index  e           charge        Ennp_atom
+  ###############################################
+         0  O   0.00000000E+00   8.07375898E-03
+         1  H   0.00000000E+00  -1.03774530E-02
+         2  H   0.00000000E+00  -1.03988168E-02
+         ...
+         ...
+
+``#`` から始まる行が終わったあとに各原子のエネルギーが記録される。原子のインデックス，元素名，電荷，エネルギーの順にスペース区切りで記録される。単位はやはりeVである。
+
+``nnforces.out`` ファイルには以下のように原子間力が記録される。
+
+::
+
+  ################################################################################
+  # Atomic force comparison (ordered by atom index).
+  ################################################################################
+  # Col  Name   Description
+  ################################################################################
+  # 1    fx     Force in x direction.
+  # 2    fy     Force in y direction.
+  # 3    fz     Force in z direction.
+  # 4    fxRef  Reference force in x direction.
+  # 5    fyRef  Reference force in y direction.
+  # 6    fzRef  Reference force in z direction.
+  # 7    fxDiff Difference between reference and NNP force in x dir.
+  # 8    fyDiff Difference between reference and NNP force in y dir.
+  # 9    fzDiff Difference between reference and NNP force in z dir.
+  ########################################################################################################################################################
+  #              1                2                3                4                5                6                7                8                9
+  #             fx               fy               fz            fxRef            fyRef            fzRef           fxDiff           fyDiff           fzDiff
+  ########################################################################################################################################################
+   -5.52018089E-03  -2.55747558E-03  -2.72759232E-02  -6.53013700E-03  -2.85245900E-03  -2.79925540E-02  -1.00995611E-03  -2.94983421E-04  -7.16630767E-04
+    4.45302177E-03  -5.87236582E-04   4.87879000E-03   4.51748800E-03  -5.17262000E-04   5.05257300E-03   6.44662297E-05   6.99745823E-05   1.73783000E-04
+   -2.56188543E-04   2.44514067E-03   2.28215838E-02   9.58150000E-05   2.21126400E-03   2.34275760E-02   3.52003543E-04  -2.33876665E-04   6.05992181E-04
+   -8.72809582E-04  -6.93552949E-03   2.70738301E-02  -2.31046000E-04  -7.15091400E-03   2.69447230E-02   6.41763582E-04  -2.15384511E-04  -1.29107106E-04
+         ...
+         ...
+
+``#`` から始まる行が終わったあとに各原子の原子間力が記録される。計算結果のx, y, z座標 ``input.data`` ファイルに記録された原子間力のx, y, z座標，差分ベクトルのx, y, z座標の順に記録される。単位はeV/Åである。
+
 
 .. |image0| image:: media/image1.png
 .. |image1| image:: media/image2.svg
