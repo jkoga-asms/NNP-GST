@@ -603,7 +603,7 @@ n2p2の入力ファイルのファイル名は ``input.nn`` である。リポ�
 ファイル名                       説明
 ================================ ==================================================================
 function.data                    symmetry functionの情報が記録されるファイル
-nnp-scaling.log.xxxx             nnp-scalingのログファイル。xxxxにはMPIのプロセス番号
+nnp-scaling.log.xxxx             nnp-scalingのログファイル。xxxxはMPIのプロセス番号
 scaling.data                     symmetry functionのスケーリングに関する情報が記録されている\
                                  ファイル。訓練時やポテンシャル利用時にも必要となる重要なファイル。
 sf.xxx.yyy.histo                 ヒストグラムが記録されたファイル。xxxは原子番号，yyyは\
@@ -641,13 +641,13 @@ sf.xxx.yyy.histo                 ヒストグラムが記録されたファイ�
 ================================ ==================================================================
 learning-curve.out               Epochごとのエネルギーや原子間力のMAE, RMSEなどが記録されている\
                                  ファイル。
-neuron-stats.xxxx.out            ニューロン情報が記録されているファイル。xxxxにはepoch番号
+neuron-stats.xxxx.out            ニューロン情報が記録されているファイル。xxxxはepoch番号
 nnp-train.log.xxxx               ``nnp-train`` のログファイル。xxxxはMPIプロセス番号
 test.data                        教師データのうちテストに回したデータ
 testforces.xxxx.out              テストデータの原子間力が記録されているファイル。xxxxはepoch番号
 testpoints.xxxx.out              テストデータのエネルギーが記録されているファイル。xxxxはepoch番号
 timing.out                       経過時間が記録されているファイル。
-train-log.out                    :nnp-train.log.xxxxファイルとは異なる情報が記録されたログファイル
+train-log.out                    nnp-train.log.xxxxファイルとは異なる情報が記録されたログファイル
 train.data                       教師データのうち訓練に用いるデータ
 trainforces.xxxx.out             訓練データの原子間力が記録されているファイル。xxxxはepoch番号
 trainpoints.xxxx.out             訓練データのエネルギーが記録されているファイル。xxxxはepoch番号
