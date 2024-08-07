@@ -826,7 +826,7 @@ n2p2
 記述子
 ^^^^^^^^^
 
-n2p2において用いることのできる記述子は `ウェブサイト <https://compphysvienna.github.io/n2p2/api/symmetry_function_types.html#_CPPv4N3nnp12SymFncExpRadE>`_ に記述がある。Behler-Parinello型のsymmetry function以外にもcompact supportつきのsymmetry functionなどを用いることができるようになっている。
+n2p2において用いることのできる記述子は `ウェブサイト <https://compphysvienna.github.io/n2p2/api/symmetry_function_types.html#_CPPv4N3nnp12SymFncExpRadE>`_ に記述がある。Behler-Parinello型のsymmetry function以外にもcompact supportを持つsymmetry functionなどを用いることができるようになっている。
 
 ニューラルネットワーク
 ^^^^^^^^^^^^^^^^^^^^^^
