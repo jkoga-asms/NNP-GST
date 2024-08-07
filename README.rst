@@ -864,7 +864,7 @@ $$ \\rm{ADF}_i \\left( \\theta \\right) = \\sum_{\\alpha} c_{\\alpha}^\\left(3\\
 LAMMPSとの連携
 ^^^^^^^^^^^^^^^^^^^^^^
 
-n2p2と違い，LAMMPS本体に組み込まれているわけではないが，インターフェースが `ウェブサイト <https://github.com/HidekiMori-CIT/aenet-lammps>` において公開されており，その指示に従いインターフェースとLAMMPSをビルドすることによってænetのポテンシャルファイルをLAMMPSから利用することができる。
+n2p2と違い，LAMMPS本体に組み込まれているわけではないが，インターフェースが `ウェブサイト <https://github.com/HidekiMori-CIT/aenet-lammps>`_ において公開されており，その指示に従いインターフェースとLAMMPSをビルドすることによってænetのポテンシャルファイルをLAMMPSから利用することができる。
 
 
 DeePMD-kit
