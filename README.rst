@@ -818,6 +818,9 @@ nnp-predict.log                  ログファイル。エネルギーや原子�
 n2p2
 ~~~~~
 
+概要
+^^^^^
+
 `n2p2 <https://compphysvienna.github.io/n2p2/>`_ はBehler-Parinello型のsymmetry functionを記述子として用いることのできるニューラルネットワークポテンシャル作成ソフトウェアである。GPL 3.0 Licenseのもと公開されている。
 
 記述子
