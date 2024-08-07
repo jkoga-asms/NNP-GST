@@ -818,17 +818,17 @@ nnp-predict.log                  ログファイル。エネルギーや原子�
 n2p2
 ~~~~~
 
-n2p2 (https://compphysvienna.github.io/n2p2/) はBehler-Parinello型のsymmetry functionを記述子として用いることのできるニューラルネットワークポテンシャル作成ソフトウェアである。GPL 3.0 Licenseのもと公開されている。
+`n2p2 <https://compphysvienna.github.io/n2p2/>`_ はBehler-Parinello型のsymmetry functionを記述子として用いることのできるニューラルネットワークポテンシャル作成ソフトウェアである。GPL 3.0 Licenseのもと公開されている。
 
 記述子
 ^^^^^^^^^
 
-n2p2において用いることのできる記述子はウェブサイト https://compphysvienna.github.io/n2p2/api/symmetry_function_types.html#_CPPv4N3nnp12SymFncExpRadE に記述がある。Behler-Parinello型のsymmetry function以外にもcomact supportつきのsymmetry functionなどを用いることができるようになっている。
+n2p2において用いることのできる記述子は `ウェブサイト <https://compphysvienna.github.io/n2p2/api/symmetry_function_types.html#_CPPv4N3nnp12SymFncExpRadE>`_ に記述がある。Behler-Parinello型のsymmetry function以外にもcomact supportつきのsymmetry functionなどを用いることができるようになっている。
 
 ニューラルネットワーク
 ^^^^^^^^^^^^^^^^^^^^^^
 
-学習先のニューラルネットワークはいわゆるfeedforward neural networkであり，その実装はライブラリーなどに頼ることなくn2p2内で行われている。利用可能なactivation functionはウェブサイト https://compphysvienna.github.io/n2p2/api/neural_network.html#_CPPv4N3nnp13NeuralNetwork18ActivationFunction11AF_IDENTITYE から参照することができる。本リポジトリのインプットでも用いたhyperbolic tangent関数のほか，logistic関数 $\\frac{1}{1+e^{-x}}$  ，softplus関数 $\\ln\\left(1+e^x\\right)$ などを用いることができる。
+学習先のニューラルネットワークはいわゆるfeedforward neural networkであり，その実装はライブラリーなどに頼ることなくn2p2内で行われている。利用可能なactivation functionは `ウェブサイト <https://compphysvienna.github.io/n2p2/api/neural_network.html#_CPPv4N3nnp13NeuralNetwork18ActivationFunction11AF_IDENTITYE>`_ から参照することができる。本リポジトリのインプットでも用いたhyperbolic tangent関数のほか，logistic関数 $\\frac{1}{1+e^{-x}}$  ，softplus関数 $\\ln\\left(1+e^x\\right)$ などを用いることができる。
 
 LAMMPSとの連携
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -841,7 +841,7 @@ LAMMPSとの連携
 概要
 ^^^^^
 
-ænet (http://ann.atomistic.net/) はMozilla Public Licenseのもと公開されているニューラルネットワークポテンシャル作成ソフトウェアである。その特徴は，文献[7]において導入された"Chebishev descriptor"を記述子として用いることができる点にある(symmetry functionもサポートしている)。Behler-Parinello型のsymmetry functionを用いる場合，元素の組み合わせごとに複数のsymmetry functionを用意する必要がある。したがって，元素の数の二乗に比例する計算コストが発生する。これに対しChebishev descriptorによる原子配置の表現では元素数に依存しない数で済むように設計されているため，元素数の多い系を扱うのに適した手法であると考えられる。
+`ænet <http://ann.atomistic.net/>`_ [7] はMozilla Public Licenseのもと公開されているニューラルネットワークポテンシャル作成ソフトウェアである。その特徴は，文献[7]において導入された"Chebishev descriptor"を記述子として用いることができる点にある(symmetry functionもサポートしている)。Behler-Parinello型のsymmetry functionを用いる場合，元素の組み合わせごとに複数のsymmetry functionを用意する必要がある。したがって，元素の数の二乗に比例する計算コストが発生する。これに対しChebishev descriptorによる原子配置の表現では元素数に依存しない数で済むように設計されているため，元素数の多い系を扱うのに適した手法であると考えられる。
 
 記述子
 ^^^^^^^^^
@@ -854,7 +854,7 @@ $$ \\rm{ADF}_i \\left( \\theta \\right) = \\sum_{\\alpha} c_{\\alpha}^\\left(3\\
 
 このようにして展開する際の展開係数 $$c_{\\alpha}^\\left(2\\right)$$ および $$c_{\\alpha}^\\left(3\\right)$$ を原子配置をあらわす記述子として用いる。RDFとADFは元素ごとに計算するわけではないため，このままでは元素ごとの情報は記述子に含まれない。そこで，元素ごとに固有の重みパラメーターを導入し，その重みパラメーターを展開係数に乗したものを記述子に追加することを行う。以上の手続きによって得られる記述子の数は元素数に依存しない。元素ごとの重みパラメーターが具体的にどのように決まるかについては文献[7]には特に記述がなく，詳細は不明である。
 
-元素の組み合わせごとに記述子を用意するわけではないため，その精度が問題になる可能性がある。文献[7]ではその点を検証し，たとえば11元系であってもChebishev多項式の次数を70程度にするとエネルギーのRMSEが3 meV/atomの精度で記述するモデルを作成することができたと報告されている。文献[7]の対応する図を見ると元素数が少ないほうが小さな次数でRMSEが収束する傾向が見て取れるので演算量が元素数に依存しないというのは言い過ぎかもしれないが，少なくとも元素数の二乗よりははるかに少ないと期待できる。
+元素の組み合わせごとに記述子を用意するわけではないため，その精度が問題になる可能性がある。文献[7]ではその点を検証し，たとえば11元系の場合Chebishev多項式の次数を70程度にするとエネルギーのRMSEが3 meV/atomの精度で記述するモデルを作成することができたと報告されている。文献[7]の対応するグラフを見ると系によっては元素数が少ないほうが小さな次数でRMSEが収束する傾向が見て取れるので演算量が元素数に依存しないというのは言い過ぎかもしれないが，少なくとも元素数の二乗よりは少ないことが期待できる。
 
 ニューラルネットワーク
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -864,7 +864,7 @@ $$ \\rm{ADF}_i \\left( \\theta \\right) = \\sum_{\\alpha} c_{\\alpha}^\\left(3\\
 LAMMPSとの連携
 ^^^^^^^^^^^^^^^^^^^^^^
 
-n2p2と違い，LAMMPS本体に組み込まれているわけではないが，インターフェースがウェブサイト https://github.com/HidekiMori-CIT/aenet-lammps において公開されており，その指示に従いインターフェースとLAMMPSをビルドすることによってænetのポテンシャルファイルをLAMMPSから利用することができる。
+n2p2と違い，LAMMPS本体に組み込まれているわけではないが，インターフェースが `ウェブサイト <https://github.com/HidekiMori-CIT/aenet-lammps>` において公開されており，その指示に従いインターフェースとLAMMPSをビルドすることによってænetのポテンシャルファイルをLAMMPSから利用することができる。
 
 
 DeePMD-kit
@@ -873,7 +873,7 @@ DeePMD-kit
 概要
 ^^^^^
 
-DeePMD-kit (https://docs.deepmodeling.com/projects/deepmd/en/r2/train/training.html) は現在活発に開発が成されているニューラルネットワークポテンシャル作成ソフトウェアである。GNU LGPLv3.0 Licenseのもとで配布されている。開発者らが独自に考案したDeep Potential Smooth Edition (DeepPot-SE) など特徴的な記述子[8]を利用することができること，ニューラルネットワークの演算にPytorch (https://pytorch.org/) を用いることによって高速なニューラルネットワークの計算ができることなどが特徴である。
+`DeePMD-kit <https://docs.deepmodeling.com/projects/deepmd/en/r2/>`_ [8] は現在活発に開発が成されているニューラルネットワークポテンシャル作成ソフトウェアであり，GNU LGPLv3.0 Licenseのもとで配布されている。開発者らが独自に考案したDeep Potential Smooth Edition (DeepPot-SE) など特徴的な記述子[8]を利用することができること，ニューラルネットワークの演算に `Pytorch <https://pytorch.org/>`_ を用いることによって高速なニューラルネットワークの計算ができることなどが特徴である。
 
 記述子
 ^^^^^^^^^
@@ -919,12 +919,12 @@ RANN
 概要
 ^^^^^
 
-Rapid artificial neural network (RANN) [9] は https://github.com/ranndip において公開されているニューラルネットワークポテンシャル作成ソフトウェアである。記述子はMEAMポテンシャルを参考にした独自のものを採用している。特に電子スピンを考慮した記述子を用いることができる点が特徴的である。リポジトリを確認する限り，特にライセンスは設定されていないようである。
+Rapid artificial neural network (RANN) [9] は `このGitHubのリポジトリ <https://github.com/ranndip>`_ において公開されているニューラルネットワークポテンシャル作成ソフトウェアである。記述子はMEAMポテンシャルを参考にした独自のものを採用している。特に電子スピンを考慮した記述子を用いることができる点が特徴的である。リポジトリを確認する限り，特にライセンスは設定されていないようである。
 
 記述子
 ^^^^^^^^^
 
-RANNにおいて用いることのできる記述子については文献[9]やウェブサイト https://github.com/ranndip/RANN-potentials に記述されている。そのうち最も特徴的と思われるradial screened spinとbond screened spinの表式を以下に記す。文献[9]やウェブサイトの記法にならい，原子のインデックスをギリシャ文字 $\\alpha, \\beta, \\gamma$ で表す。
+RANNにおいて用いることのできる記述子については文献[9]や `GitHubのリポジトリ <https://github.com/ranndip/RANN-potentials>`_ に記述されている。そのうち最も特徴的と思われるradial screened spinとbond screened spinの表式を以下に記す。文献[9]やウェブサイトの記法にならい，原子のインデックスをギリシャ文字 $\\alpha, \\beta, \\gamma$ で表す。
 
 $$ f_i^\\alpha = \\sum_\\beta \\left( \\frac{r^{\\alpha \\beta}}{r_e} \\right)^i e^{-\\delta_i \\frac{r^{\\alpha \\beta}}{r_e}} \\left( \\bf{s}^\\alpha \\cdot \\bf{s}^\\beta \\right) f_c \\left( \\frac{r_c-r^{\\alpha \\beta}}{dr} \\right) $$
 
