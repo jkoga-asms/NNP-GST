@@ -412,16 +412,6 @@ GeSb\ :sub:`2`\ Te\ :sub:`4`\ の分子動力学シミュレーションにお�
 
 図8 アモルファス構造から結晶に転移する様子。
 
-参考文献
-========
-
-#. J\. Behler and M. Parrinello, Phys. Rev. Lett. 98, 146401 (2007).
-#. Jörg Behler, International Journal of Quantum Chemistry 115, 1032 (2015)
-#. Giulio Imbalzano, Andrea Anelli, Daniele Giofré, Sinja Klees, Jörg Behler, Michele Ceriotti, J. Chem. Phys. 148, 241730 (2018).
-#. M\.  Gastegger, L. Schwiedrzik, M. Bittermann, F. Berzsenyi, P. Marquetand, J. Chem. Phys. 148, 241709 (2018).
-#. A\.  Singraber, T. Morawietz, J. Behler and C. Dellago, J. Chem. Theory Comput. 2019, 15 (5), 3075–3092.
-#. T\.  Yamasaki, A. Kuroda, T. Kato, J. Nara, J. Koga, T. Uda, K. Minami, and T. Ohno, Computer Physics Communications 244, 264-276 (2019).
-
 補遺
 ========
 
@@ -819,6 +809,164 @@ nnp-predict.log                  ログファイル。エネルギーや原子�
          ...
 
 ``#`` から始まる行が終わったあとに各原子の原子間力が記録される。計算結果のx, y, z座標 ``input.data`` ファイルに記録された原子間力のx, y, z座標，差分ベクトルのx, y, z座標の順に記録される。単位はeV/Åである。
+
+ニューラルネットワークポテンシャル作成ソフトウェアについて
+--------------------------------------------------------------------
+
+本リポジトリにおいてはn2p2を用いてニューラルネットワークポテンシャルを作成したが，ニューラルネットワークポテンシャルを作成することのできるソフトウェアは他にも多く存在する。ここではニューラルネットワーク作成ソフトウェアについてその特徴や理論を紹介し，さらにn2p2も含めた各ソフトウェアの使い分けについて議論したい。
+
+n2p2
+~~~~~
+
+n2p2 (https://compphysvienna.github.io/n2p2/) はBehler-Parinello型のsymmetry functionを記述子として用いることのできるニューラルネットワークポテンシャル作成ソフトウェアである。GPL 3.0 Licenseのもと公開されている。
+
+記述子
+^^^^^^^^^
+
+n2p2において用いることのできる記述子はウェブサイト https://compphysvienna.github.io/n2p2/api/symmetry_function_types.html#_CPPv4N3nnp12SymFncExpRadE に記述がある。Behler-Parinello型のsymmetry function以外にもcomact supportつきのsymmetry functionなどを用いることができるようになっている。
+
+ニューラルネットワーク
+^^^^^^^^^^^^^^^^^^^^^^
+
+学習先のニューラルネットワークはいわゆるfeedforward neural networkであり，その実装はライブラリーなどに頼ることなくn2p2内で行われている。利用可能なactivation functionはウェブサイト https://compphysvienna.github.io/n2p2/api/neural_network.html#_CPPv4N3nnp13NeuralNetwork18ActivationFunction11AF_IDENTITYE から参照することができる。本リポジトリのインプットでも用いたhyperbolic tangent関数のほか，logistic関数 $\\frac{1}{1+e^{-x}}$  ，softplus関数 $\\ln\\left(1+e^x\\right)$ などを用いることができる。
+
+LAMMPSとの連携
+^^^^^^^^^^^^^^^^^^^^^^
+
+上述したように，LAMMPSのソースディレクトリーにおいて ``make yes-ml-hdnnp`` とすることによってn2p2のポテンシャルファイルを用いることができるLAMMPSバイナリーが得られる。
+
+ænet
+~~~~~
+
+概要
+^^^^^
+
+ænet (http://ann.atomistic.net/) はMozilla Public Licenseのもと公開されているニューラルネットワークポテンシャル作成ソフトウェアである。その特徴は，文献[7]において導入された"Chebishev descriptor"を記述子として用いることができる点にある(symmetry functionもサポートしている)。Behler-Parinello型のsymmetry functionを用いる場合，元素の組み合わせごとに複数のsymmetry functionを用意する必要がある。したがって，元素の数の二乗に比例する計算コストが発生する。これに対しChebishev descriptorによる原子配置の表現では元素数に依存しない数で済むように設計されているため，元素数の多い系を扱うのに適した手法であると考えられる。
+
+記述子
+^^^^^^^^^
+
+ænetにおいてはChebishev descriptorという独自の記述子を用いることができる。Chebishev descriptor においては，原子 $i$ の動径分布関数 (radial distribution function, RDF) と角度分布関数 (angular distribution function) をChebishev多項式 $\\left\\{ \\phi_{\\alpha} \\right\\}$ によって展開する。
+
+$$ \\rm{RDF}_i \\left( r \\right) = \\sum_{\\alpha} c_{\\alpha}^\\left(2\\right) \\phi_{\\alpha} \\left( r \\right) $$
+
+$$ \\rm{ADF}_i \\left( \\theta \\right) = \\sum_{\\alpha} c_{\\alpha}^\\left(3\\right) \\phi_{\\alpha} \\left( \\theta \\right) $$
+
+このようにして展開する際の展開係数 $$c_{\\alpha}^\\left(2\\right)$$ および $$c_{\\alpha}^\\left(3\\right)$$ を原子配置をあらわす記述子として用いる。RDFとADFは元素ごとに計算するわけではないため，このままでは元素ごとの情報は記述子に含まれない。そこで，元素ごとに固有の重みパラメーターを導入し，その重みパラメーターを展開係数に乗したものを記述子に追加することを行う。以上の手続きによって得られる記述子の数は元素数に依存しない。元素ごとの重みパラメーターが具体的にどのように決まるかについては文献には特に記述がなく，詳細は不明である。
+
+元素の組み合わせごとに記述子を用意するわけではないため，その精度が問題になる可能性がある。文献ではその点を検証し，たとえば11元系であってもChebishev多項式の次数を70程度にするとエネルギーのRMSEが3 meV/atomの精度で記述するモデルを作成することができたと報告されている。文献の対応する図を見ると元素数が少ないほうが小さな次数でRMSEが収束する傾向が見て取れるので演算量が元素数に依存しないというのは言い過ぎかもしれないが，少なくとも元素数の二乗よりははるかに少ないと言える。
+
+ニューラルネットワーク
+^^^^^^^^^^^^^^^^^^^^^^
+
+学習先のニューラルネットワークそのものはn2p2と同じfeedforward neural networkであり，その実装はライブラリーなどに頼ることなくænet内で行われている。Activation functionとしてはhyperbolic tangentやsigmoid関数を用いることができるようになっている。原子間力を考慮した学習には対応していないようである。
+
+LAMMPSとの連携
+^^^^^^^^^^^^^^^^^^^^^^
+
+n2p2と違い，LAMMPS本体に組み込まれているわけではないが，インターフェースがウェブサイト https://github.com/HidekiMori-CIT/aenet-lammps において公開されており，その指示に従いインターフェースとLAMMPSをビルドすることによってænetのポテンシャルファイルをLAMMPSから利用することができる。
+
+
+DeePMD-kit
+~~~~~~~~~~~~
+
+概要
+^^^^^
+
+DeePMD-kit (https://docs.deepmodeling.com/projects/deepmd/en/r2/train/training.html) は現在活発に開発が成されているニューラルネットワークポテンシャル作成ソフトウェアである。GNU LGPLv3.0 Licenseのもとで配布されている。開発者らが独自に考案したDeep Potential Smooth Edition (DeepPot-SE) など特徴的な記述子を利用することができること，ニューラルネットワークの演算にPytorch (https://pytorch.org/) を用いることによって高速なニューラルネットワークの計算ができることなどが特徴である。
+
+記述子
+^^^^^^^^^
+
+文献やウェブサイトの情報によると多くの種類の記述子を用いることができるようである。ここではDeepPot-SE記述子について紹介する。DeepPot-SEでは，まずは原子 $i$ とそれに近接する原子 $j$ の座標データを用いて以下のような行ベクトル $\\tilde{R}^i$ を作る。
+
+$$ \\tilde{R}^i = \\left\\{ s \\left( r_{ij} \\right), \\hat{x}_{ij}, \\hat{y}_{ij}, \\hat{z}_{ij} \\right\\} $$
+
+ここで $s\\left(r_{ij}\\right)$ は以下のような関数， $\\hat{x}_{ij} = \\frac{s\\left(r_{ij}\\right) x_{ij}}{r_{ij}}$ , $\\hat{y}_{ij} = \\frac{s\\left(r_{ij}\\right) y_{ij}}{r_{ij}}$ , $\\hat{z}_{ij} = \\frac{s\\left(r_{ij}\\right) z_{ij}}{r_{ij}}$ である。
+
+$$ s\\left( r_{ij} \\right) = \\frac{1}{r_{ij}} (r_{ij} < r_{cs}) $$
+
+$$ s\\left( r_{ij} \\right) = \\frac{1}{r_{ij}} \\left\\{ \\frac{1}{2} \\cos \\left[\\pi \\frac{\\left( r_{ij}-r_{cs} \\right)}{\\left( r_c - r_{cs}\\right)} \\right] + \\frac{1}{2}     \\right\\} (r_{cs}< r_{ij} < r_c) $$
+
+$$ 0 (r_{ij}  > r_c) $$
+
+ここで $r_c$ はカットオフ距離， $r_{cs}$ はカットオフ距離においてスムーズに0へ減衰させるためのカットオフパラメーターである。
+
+つぎに，"embedding network" $$G\\left(s\\left(r_{ij}\\right)\\right)$$ を定義する。これは スカラー量である $$s\\left( r_{ij} \\right)$$ を $$M_1$$ 個の出力にマップするニューラルネットワークである。 $$G$$ のネットワークパラメーターは原子 $i,j$ の原子種に依存する。原子 $i$ に対してこのネットワークを作用すると原子 $i$ の近接原子の原子数を $N_i$ とすると $$N_i \\times M_1$$ の行列が得られるため，このネットワークは行列で表現することができる。そこでこのネットワークの行列表記を $G^{i1}$ とする。さらに $G^{i1}$ の最初の $M_2$ 列を抽出した行列を $G^{i2}$ とする。この二つの行列と原子 $i$ の近傍原子の差分ベクトルの行列 $R^i = \\left\\{ x_{ij}, y_{ij}, z_{ij} \\right\\}$ を用いて以下のような演算を行う。
+
+$$ D^i = \\left( G^{i1} \\right)^T R^i \\left( R^i \\right)^T G^{i2} $$
+
+最終的に得られた $D^i$ という行列が原子 $i$ をあらわすDeepPot-SE記述子である（ただし行列のままでは扱いづらいため，ベクトルに展開する）Embedding networkを介して変換を施すことによって記述子が得られるようになっているため，embedding networkの設定によって非常に柔軟に記述子の大きさや多様性をコントロールすることができるのがDeepPot-SEの特徴である。
+
+ニューラルネットワーク
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+DeepMD-kitにおいては二種類のニューラルネットワークが用いられる。一つは先にも紹介した記述子を構築するためのembedding networkである。これ以上のことは文献に記載がないので詳細は不明である。もう一つは記述子を入力とし，エネルギーを出力とするfitting networkである。Fitting networkはn2p2, ænet同様標準的なfeedforward neural networkである。Skip connectionを用いることとPytorchをバックエンドとしているため高速な動作が期待できることなどがn2p2, ænetとの違いと言える。
+
+LAMMPSとの連携
+^^^^^^^^^^^^^^^^^^^^^^
+
+DeePMD-kitは多くのライブラリーに依存するアプリケーションのため，ソースからビルドする難易度が非常に高い（本稿の著者は断念した）しかし，コンパイル済みのバイナリーパッケージをcondaなどから入手できるようになっており，その際同時にインストールすることができるLAMMPSはDeePMD-kitのポテンシャルファイルを利用することができる。以下のようなコマンドを実行すればよい。
+
+::
+
+  conda create -n deepmd deepmd-kit lammps horovod -c conda-forge
+
+
+RANN
+~~~~~~~~~~~~
+
+概要
+^^^^^
+
+Rapid artificial neural network (RANN) は https://github.com/ranndip において公開されているニューラルネットワークポテンシャル作成ソフトウェアである。記述子はMEAMポテンシャルを参考にした独自のものを採用している。特に電子スピンを考慮した記述子を用いることができる点が特徴的である。リポジトリを確認する限り，特にライセンスは設定されていないようである。
+
+記述子
+^^^^^^^^^
+
+RANNにおいて用いることのできる記述子については https://github.com/ranndip/RANN-potentials に記述されている。そのうち最も特徴的と思われるradial screened spinとbond screened spinの表式を以下に記す。ウェブサイトの記法にならい，原子のインデックスをギリシャ文字 $\\alpha, \\beta, \\gamma$ で表した。
+
+$$ f_i^\\alpha = \\sum_\\beta \\left( \\frac{r^{\\alpha \\beta}}{r_e} \\right)^i e^{-\\delta_i \\frac{r^{\\alpha \\beta}}{r_e}} \\left( \\bf{s}^\\alpha \\cdot \\bf{s}^\\beta \\right) f_c \\left( \\frac{r_c-r^{\\alpha \\beta}}{dr} \\right) $$
+
+$$ f_{ij}^{\\alpha} = \\sum_{\\beta} \\sum_{\\gamma} \\left( \\cos \\left(\\theta_{\\alpha\\beta\\gamma}\\right)\\right)^i  e^{-\\delta_j \\frac{r^{\\alpha \\beta}}{r_e}}  e^{-\\delta_j \\frac{r^{\\alpha \\gamma}}{r_e}} S^{\\alpha\\beta} S^{\\alpha\\gamma} \\left( \\bf{s}^{\\alpha} \\bf{s}^{\\beta} \\right) \\left( \\bf{s}^{\\alpha} \\bf{s}^{\\gamma} \\right) f_c \\left( \\frac{r_c-r^{\\alpha \\beta}}{dr} \\right) f_c \\left( \\frac{r_c-r^{\\alpha \\gamma}}{dr} \\right)$$
+
+式中の $r_e, i, \\delta_i, dr, r_c$ はパラメーターである。また， $f_c$ はカットオフ関数であり，距離 $r_c$ において0になるようなスムーズな関数である。さらに $S^{\\alpha\\beta}$ は原子 $\\alpha, \\beta$ とその間にある原子がなす角度に依存するカットオフ関数であり，この項によって考慮すべき近接原子の数を削減することができる。最後に $\\bf{s}^\\alpha$ は原子 $\\alpha$ のスピン分極である。内積で計算するので，スピン分極がない原子も存在する場合その貢献分を補うようスピンに依存しない記述子も含める必要がある。
+
+ニューラルネットワーク
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+学習先のニューラルネットワークはn2p2, ænetと同じfeedforward neural networkであり，その実装はライブラリーなどに頼ることなくRANN内で行われている。ænet同様原子間力を考慮した学習には対応していないようである。用いることのできるactivation functionは $\\frac{x}{10}+\\frac{9}{10} \\log \\left( e^x + 1 \\right)$ という表式のもの。
+
+LAMMPSとの連携
+^^^^^^^^^^^^^^^^^^^^^^
+
+RANNはLAMMPSにパッケージとして組み込まれている。そのため，LAMMPSのソースディレクトリーにおいて以下のようなコマンドを実行することによってRANNのポテンシャルファイルが使えるLAMMPSバイナリーを得ることができる。
+
+::
+
+  make yes-ml-rann
+  make mpi
+
+ソフトウェア比較
+~~~~~~~~~~~~~~~~~~
+
+ここまで4種類のニューラルネットワーク作成ソフトウェアを紹介したが，どれを用いるのがよいのだろうか。それぞれの特徴を鑑みながら考えてみたい。
+
+- n2p2は最初に提案され，その後も広く使われてきたオーソドックスな手法に従ってポテンシャルを作ることができる。実績も豊富なので，いろいろな問題に安心して用いることができる。ソフトウェアのロバスト性も高い印象である。ニューラルネットワークの演算は自前で，GPUに対応しているわけでもないので計算速度はそれほど期待できない。
+- ænetの記述子は元素の数にその演算量が極力依存しないように設計されている。この方針による精度の悪化も，少なくとも文献においては心配する必要はないと報告されてる。そのため多くの原子種が存在する系を扱いたい場合に適していると考えられる。ニューラルネットワークに関してはn2p2の場合と同様高速な動作は期待できない。
+- DeepMD-kit は記述子の評価の仕方が複雑で，その分柔軟に様々な原子配置を記述することができることが期待できる。また，ニューラルネットワークの評価はPytorchを介して行うため，高速な動作が期待できる。実際n2p2やænetと比較すると各ソフトウェアのニューラルネットワークの標準的な設定が大きく異なる (n2p2, ænetは隠れ層2-3層, 層ごとのノード数はおおよそ10-20なのに対しDeePMD-kitは隠れ層3-4層，層ごとのノード数はおおよそ100-200) にも関わらず学習，予測は同程度の時間で実行することができる。GPUを用いることができればさらに高速な動作が見込める。
+- RANNは電子スピンを考慮することができる点が特徴的である。原子配置は同じで各原子のスピン分極のみが異なるような系を扱うのであればここまであげたソフトウェアの中では選択肢はRANNしかない。ニューラルネットワークに関してはn2p2, ænetと同様である。
+- ænet, RANNは原子間力を用いた学習には対応していないようである。原子間力を用いた学習を行うと経験上まさにその原子間力の予測精度が向上する。これは分子動力学シミュレーションに活用するにあたって重要なポイントである。ただし特にn2p2の場合原子間力を用いる学習を行うとメモリ消費量が劇的に増加するため，注意を要する。
+
+参考文献
+========
+
+#. J\. Behler and M. Parrinello, Phys. Rev. Lett. 98, 146401 (2007).
+#. Jörg Behler, International Journal of Quantum Chemistry 115, 1032 (2015)
+#. Giulio Imbalzano, Andrea Anelli, Daniele Giofré, Sinja Klees, Jörg Behler, Michele Ceriotti, J. Chem. Phys. 148, 241730 (2018).
+#. M\.  Gastegger, L. Schwiedrzik, M. Bittermann, F. Berzsenyi, P. Marquetand, J. Chem. Phys. 148, 241709 (2018).
+#. A\.  Singraber, T. Morawietz, J. Behler and C. Dellago, J. Chem. Theory Comput. 2019, 15 (5), 3075–3092.
+#. T\.  Yamasaki, A. Kuroda, T. Kato, J. Nara, J. Koga, T. Uda, K. Minami, and T. Ohno, Computer Physics Communications 244, 264-276 (2019).
 
 
 .. |image0| image:: media/image1.png
