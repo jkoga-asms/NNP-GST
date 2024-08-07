@@ -844,7 +844,7 @@ LAMMPSとの連携
 概要
 ^^^^^
 
-`ænet <http://ann.atomistic.net/>`_ [7] はMozilla Public Licenseのもと公開されているニューラルネットワークポテンシャル作成ソフトウェアである。その特徴は，文献[7]において導入された"Chebishev descriptor"を記述子として用いることができる点にある(symmetry functionもサポートしている)。Behler-Parinello型のsymmetry functionを用いる場合，元素の組み合わせごとに複数のsymmetry functionを用意する必要がある。したがって，元素の数の二乗に比例する計算コストが発生する。これに対しChebishev descriptorによる原子配置の表現では元素数に依存しない数で済むように設計されているため，元素数の多い系を扱うのに適した手法であると考えられる。
+`ænet <http://ann.atomistic.net/>`_ [7] はMozilla Public Licenseのもと公開されているニューラルネットワークポテンシャル作成ソフトウェアである。その特徴は，文献[7]において導入された"Chebishev descriptor"を記述子として用いることができる点にある(symmetry functionもサポートしている)。Behler-Parinello型のsymmetry functionを用いる場合，元素の組み合わせごとに複数のsymmetry functionを用意する必要がある。したがって，元素の数の二乗に比例する計算コストが発生する（三体の記述子の場合三乗）これに対しChebishev descriptorによる原子配置の表現では元素数に依存しない数で済むように設計されているため，元素数の多い系を扱うのに適した手法であると考えられる。
 
 記述子
 ^^^^^^^^^
