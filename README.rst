@@ -844,12 +844,12 @@ LAMMPSとの連携
 概要
 ^^^^^
 
-`ænet <http://ann.atomistic.net/>`_ [7] はMozilla Public Licenseのもと公開されているニューラルネットワークポテンシャル作成ソフトウェアである。その特徴は，文献[7]において導入された"Chebishev descriptor"を記述子として用いることができる点にある(symmetry functionもサポートしている)。Behler-Parinello型のsymmetry functionを用いる場合，元素の組み合わせごとに複数のsymmetry functionを用意する必要がある。したがって，元素の数の二乗に比例する計算コストが発生する（三体の記述子の場合三乗）これに対しChebishev descriptorによる原子配置の表現では元素数に依存しない数で済むように設計されているため，元素数の多い系を扱うのに適した手法であると考えられる。
+`The Atomic Energy NETwork (ænet) <http://ann.atomistic.net/>`_ [7] はMozilla Public Licenseのもと公開されているニューラルネットワークポテンシャル作成ソフトウェアである。その特徴は，文献[7]において導入された"Chebishev descriptor"を記述子として用いることができる点にある(symmetry functionもサポートしている)。Behler-Parinello型のsymmetry functionを用いる場合，元素の組み合わせごとに複数のsymmetry functionを用意する必要がある。したがって，元素の数の二乗に比例する計算コストが発生する（三体の記述子の場合三乗）これに対しChebishev descriptorによる原子配置の表現では元素数に依存しない数で済むように設計されているため，元素数の多い系を扱うのに適した手法であると考えられる。
 
 記述子
 ^^^^^^^^^
 
-ænetにおいてはChebishev descriptorという独自の記述子を用いることができる。Chebishev descriptor においては，原子 $i$ の動径分布関数 (radial distribution function, RDF) と角度分布関数 (angular distribution function) をChebishev多項式 $\\left\\{ \\phi_{\\alpha} \\right\\}$ によって展開する。
+ænetにおいてはChebishev descriptorという独自の記述子を用いることができる。Chebishev descriptor においては，原子 $i$ の動径分布関数 (radial distribution function, RDF) と角度分布関数 (angular distribution function, ADF) をChebishev多項式 $\\left\\{ \\phi_{\\alpha} \\right\\}$ によって展開する。
 
 $$ \\rm{RDF}_i \\left( r \\right) = \\sum_{\\alpha} c_{\\alpha}^\\left(2\\right) \\phi_{\\alpha} \\left( r \\right) $$
 
@@ -862,13 +862,12 @@ $$ \\rm{ADF}_i \\left( \\theta \\right) = \\sum_{\\alpha} c_{\\alpha}^\\left(3\\
 ニューラルネットワーク
 ^^^^^^^^^^^^^^^^^^^^^^
 
-学習先のニューラルネットワークはn2p2と同じfeedforward neural networkであり，その実装はライブラリーなどに頼ることなくænet内で行われている。Activation functionとしてはhyperbolic tangentやsigmoid関数を用いることができるようになっている。原子間力を考慮した学習には対応していないようである。
+学習先のニューラルネットワークはn2p2と同じfeedforward neural networkであり，その実装はライブラリーなどに頼ることなくænet内で行われている。Activation functionとしてはhyperbolic tangentやsigmoid関数 (n2p2のlogistic関数と同じもの) を用いることができるようになっている。原子間力を考慮した学習には対応していないようである。
 
 LAMMPSとの連携
 ^^^^^^^^^^^^^^^^^^^^^^
 
-n2p2と違い，LAMMPS本体に組み込まれているわけではないが，インターフェースが `ウェブサイト <https://github.com/HidekiMori-CIT/aenet-lammps>`_ において公開されており，その指示に従いインターフェースとLAMMPSをビルドすることによってænetのポテンシャルファイルをLAMMPSから利用することができる。
-
+n2p2と違いLAMMPS本体に組み込まれているわけではないが，インターフェースが `ウェブサイト <https://github.com/HidekiMori-CIT/aenet-lammps>`_ において公開されており，その指示に従いインターフェースとLAMMPSをビルドすることによってænetのポテンシャルファイルをLAMMPSから利用することができる。
 
 DeePMD-kit
 ~~~~~~~~~~~~
@@ -881,7 +880,7 @@ DeePMD-kit
 記述子
 ^^^^^^^^^
 
-文献[8]やウェブサイトの情報によると多くの種類の記述子を用いることができるようである。ここではDeepPot-SE記述子について紹介する。DeepPot-SEでは，まずは原子 $i$ とそれに近接する原子 $j$ の座標データを用いて以下のような行ベクトル $\\tilde{R}^i$ を作る。
+文献[8]やウェブサイトの情報によると多くの種類の記述子を用いることができるようである。ここではDeepPot-SE記述子を紹介する。DeepPot-SEでは，まずは原子 $i$ とそれに近接する原子 $j$ の座標データを用いて以下のような行ベクトル $\\tilde{R}^i$ を作る。
 
 $$ \\tilde{R}^i = \\left\\{ s \\left( r_{ij} \\right), \\hat{x}_{ij}, \\hat{y}_{ij}, \\hat{z}_{ij} \\right\\} $$
 
@@ -933,7 +932,7 @@ $$ f_i^\\alpha = \\sum_\\beta \\left( \\frac{r^{\\alpha \\beta}}{r_e} \\right)^i
 
 $$ f_{ij}^{\\alpha} = \\sum_{\\beta} \\sum_{\\gamma} \\left( \\cos \\left(\\theta_{\\alpha\\beta\\gamma}\\right)\\right)^i  e^{-\\delta_j \\frac{r^{\\alpha \\beta}}{r_e}}  e^{-\\delta_j \\frac{r^{\\alpha \\gamma}}{r_e}} S^{\\alpha\\beta} S^{\\alpha\\gamma} \\left( \\bf{s}^{\\alpha} \\bf{s}^{\\beta} \\right) \\left( \\bf{s}^{\\alpha} \\bf{s}^{\\gamma} \\right) f_c \\left( \\frac{r_c-r^{\\alpha \\beta}}{dr} \\right) f_c \\left( \\frac{r_c-r^{\\alpha \\gamma}}{dr} \\right)$$
 
-式中の $r^{\\alpha\\beta}$ は原子 $\\alpha, \\beta$ 間の距離， $\\theta_{\\alpha\\beta\\gamma}$ は原子 $\\alpha, \\beta, \\gamma$ の成す角， $r_e, i, \\delta_i, dr, r_c$ はパラメーターである。また， $f_c$ はカットオフ関数であり，距離 $r_c$ において0になるようなスムーズな関数である。さらに $S^{\\alpha\\beta}$ は原子 $\\alpha, \\beta$ とその間にある原子がなす角度に依存するカットオフ関数であり，この項によって考慮すべき近接原子の数を削減することができる。最後に $\\bf{s}^\\alpha$ は原子 $\\alpha$ のスピン分極である。内積で計算するので，スピン分極がない原子も存在する場合その貢献分を補うようスピンに依存しない記述子も含める必要がある。
+式中の $r^{\\alpha\\beta}$ は原子 $\\alpha, \\beta$ 間の距離， $\\theta_{\\alpha\\beta\\gamma}$ は原子 $\\alpha, \\beta, \\gamma$ の成す角， $r_e, i, \\delta_i, dr, r_c$ はパラメーターである。また， $f_c$ はカットオフ関数であり，距離 $r_c$ において0になるようなスムーズな関数である。さらに $S^{\\alpha\\beta}$ はMEAMポテンシャルでも採用されている項であり，原子 $\\alpha, \\beta$ とその間にある原子がなす角度に依存するカットオフ関数である。この項によって考慮すべき近接原子の数を削減することができるため，それだけ高速に動作する（手法名に含まれる"Rapid"の由来）最後に $\\bf{s}^\\alpha$ は原子 $\\alpha$ のスピン分極である。内積で計算するので，スピン分極がない原子も存在する場合その貢献分を補うようスピンに依存しない記述子も含める必要がある。
 
 ニューラルネットワーク
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -959,7 +958,7 @@ RANNはLAMMPSにパッケージとして組み込まれている。そのため�
 - ænetの記述子は元素の数にその演算量が極力依存しないように設計されている。この方針による精度の悪化も，少なくとも文献[7]においては心配する必要はないと報告されている。そのため多くの原子種が存在する系を扱いたい場合に適していると考えられる。ニューラルネットワークに関してはn2p2の場合と同様高速な動作は期待できない。
 - DeePMD-kit は記述子の評価の仕方が複雑で，その分柔軟に様々な原子配置を記述することができることが期待できる。また，ニューラルネットワークの評価はPyTorchを介して行うため，高速な動作が期待できる。特にGPUを用いると高速に動作する。
 - RANNは電子スピンを考慮することができる点が特徴的である。原子配置は同じで各原子のスピン分極のみが異なるような系を扱うのであればここまであげたソフトウェアの中では選択肢はRANNしかない。ニューラルネットワークに関してはn2p2, ænetと同様である。
-- ænet, RANNは原子間力を用いた学習には対応していないようである。原子間力を用いた学習を行うと経験上まさにその原子間力の予測性能が向上する。これは分子動力学シミュレーションに活用するにあたって重要なポイントである。ただし特にn2p2の場合原子間力を用いる学習を行うとメモリ消費量が劇的に増加するため，注意を要する。
+- ænet, RANNは原子間力を用いた学習には対応していないようである。原子間力を用いた学習を行うと経験上まさにその原子間力の予測性能が向上する。これは分子動力学シミュレーションに活用するにあたって重要なポイントである。ただしn2p2の場合原子間力を用いる学習を行うとメモリ消費量が劇的に増加するため，注意を要する。
 
 参考文献
 ========
